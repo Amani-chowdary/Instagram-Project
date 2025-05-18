@@ -86,22 +86,44 @@ VALUES (1, 18), (1, 17), (1, 21), (1, 13), (1, 19), (2, 4), (2, 3), (2, 20), (2,
 SELECT * FROM PHOTO_TAGS;
 
 -- QUERIES
+/**
+ * Our Investors would like to know...
+ * How many times does the average user post?
+ **/
 
 SELECT ROUND((SELECT COUNT(*) FROM PHOTOS)/(SELECT COUNT(*) FROM USERS)) AS AVG_USER_POST;
 
+/* Finding 5 oldest users */
+
 SELECT *FROM USERS
 ORDER BY  CREATED_AT LIMIT 5;
+
+/**
+ * We need to figure out when to schedule an ad campaign.
+ * What days of the week do most users register on?
+ **/
 
 SELECT DAYNAME(CREATED_AT) AS DAYNAME, 
 COUNT(*) FROM USERS 
 GROUP BY DAYNAME
 ORDER BY COUNT(*) DESC LIMIT 1;
 
+/**
+ * We want to target our inactive users with an email campaign.
+ * Find the users who have never posted a photo?
+ **/
+
 SELECT USERS.USERNAME,PHOTOS.IMAGE_URL
 FROM USERS
 LEFT JOIN PHOTOS
 ON USERS.ID = PHOTOS.USER_ID
 WHERE PHOTOS.IMAGE_URL IS NULL;
+
+/**
+ * We are running a new contest to see who can get the most likes on a 
+ * single photo.
+ * Find out who won the contest? 
+ **/
 
 SELECT USERS.USERNAME,PHOTOS.IMAGE_URL,COUNT(*)
 FROM PHOTOS
@@ -111,6 +133,45 @@ JOIN USERS
 ON USERS.ID = PHOTOS.ID
 GROUP BY PHOTOS.ID
 ORDER BY COUNT(*) DESC LIMIT 1;
+
+/**
+ * A Brand wants to know which hashtags to use in a Post.
+ * What are the Top 5 most commonly used hashtags?
+ **/
+
+SELECT
+    tags.id AS tag_id,
+    tags.tag_name,
+    COUNT(*) as total_tags_count
+FROM tags
+    JOIN photo_tags
+        ON tags.id = photo_tags.tag_id
+    GROUP BY tags.id
+    ORDER BY total_tags_count DESC
+    LIMIT 5;
+    
+    /**
+ * We have a small problem with bots on our site...
+ * Find number of users who have liked every single photo on the site?
+ **/
+    
+    SELECT
+    users.id AS user_id,
+    users.username,
+    COUNT(*) AS total_user_likes
+FROM users
+    JOIN likes
+        ON users.id = likes.user_id
+    GROUP BY users.id
+    HAVING total_user_likes = (
+        SELECT COUNT(*) FROM photos
+    );
+
+
+
+
+
+
 
 
 
